@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  go-processor:
+    build: .
+    depends_on:
+      - mongo
+      - activemq
+    ports:
+      - 9090:9090
+    env_file:
+      - ./commons.env
+
+  activemq:
+    image: rmohr/activemq
+    ports:
+      - 61616:61616
+      - 61613:61613
+      - 8161:8161
+
+  mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGODB_APPLICATION_DATABASE=admin
+      - MONGODB_APPLICATION_USER=admin
+      - MONGODB_APPLICATION_PASS=admin
+    ports:
+      - 27017:27017
