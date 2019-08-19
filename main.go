@@ -43,7 +43,6 @@ func main() {
 		e.Logger.Fatal("[Go-Processor] Could not resolve Data access layer: ", err)
 	}
 
-	go queue.GetInstance().Listen(config.UserUpdateTopic)
 	go queue.GetInstance().Listen(config.UserCreateTopic)
 	go queue.GetInstance().Listen(config.UserRemovedTopic)
 	go processor.GetInstance().Process()

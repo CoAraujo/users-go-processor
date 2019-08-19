@@ -3,57 +3,22 @@ package domains
 import "time"
 
 type User struct {
-	ID                 string                                `json:"id,omitempty"`
-	Email              string                                `json:"email,omitempty"`
-	Username           string                                `json:"username,omitempty"`
-	Name               string                                `json:"fullName,omitempty"`
-	Gender             string                                `json:"gender,omitempty"`
-	Status             string                                `json:"status,omitempty"`
-	BirthDate          string                                `json:"birthDate,omitempty"`
-	UpdatedAt          *time.Time                            `json:"updatedAt,omitempty"`
-	Phone              *Phone                                `json:"phones,omitempty"`
-	Address            *Address                              `json:"address,omitempty"`
+	ID        string    `bson:"id,omitempty" json:"id,omitempty"`
+	Email     string    `bson:"email,omitempty" json:"email,omitempty"`
+	Username  string    `bson:"username,omitempty" json:"username,omitempty"`
+	Name      string    `bson:"fullName,omitempty" json:"fullName,omitempty"`
+	Gender    string    `bson:"gender,omitempty" json:"gender,omitempty"`
+	Status    string    `bson:"status,omitempty" json:"status,omitempty"`
+	BirthDate string    `bson:"birthDate,omitempty" json:"birthDate,omitempty"`
+	Phones    *Phone    `bson:"phones,omitempty" json:"phones,omitempty"`
+	ClientID  string    `bson:"clientId,omitempty" json:"clientId,omitempty"`
+	UpdatedAt time.Time `bson:"updatedAt,omitempty" json:"updatedAt,omitempty"`
 }
 
 type Phone struct {
-	Cellphone            string `json:"cellPhone,omitempty"`
-	DDDCellphone         string `json:"dddCellPhone,omitempty"`
-	Phone                string `json:"phone,omitempty"`
-	DDDPhone             string `json:"dddPhone,omitempty"`
-	MobilePhoneConfirmed bool   `json:"mobilePhoneConfirmed,omitempty"`
-}
-
-type Address struct {
-	City          City    `json:"city,omitempty"`
-	State         State   `json:"state,omitempty"`
-	Country       Country `json:"country,omitempty"`
-	ID            string  `json:"id,omitempty"`
-	Neighborhood  string  `json:"neighborhood,omitempty"`
-	Zipcode       string  `json:"zipCode,omitempty"`
-	Address1      string  `json:"address1,omitempty"`
-	Address2      string  `json:"address2,omitempty"`
-	SimpleAddress string  `json:"simpleAddress,omitempty"`
-	AddressType   string  `json:"addressType,omitempty"`
-	Number        int64   `json:"number,omitempty"`
-}
-
-type City struct {
-	ID         int64  `json:"id,omitempty"`
-	IBGECityId int64  `json:"ibgeId,omitempty"`
-	Name       string `json:"name,omitempty"`
-}
-
-type State struct {
-	Capital      int    `json:"capital,omitempty"`
-	ID           int64  `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Initials     string `json:"initials,omitempty"`
-	Abbreviation string `json:"abbreviation,omitempty"`
-	IBGEStateId  int64  `json:"ibgeId,omitempty"`
-}
-
-type Country struct {
-	ID       int64  `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Initials string `json:"initials,omitempty"`
+	Phone                string    `bson:"phone,omitempty" json:"phone,omitempty"`
+	CellPhone            string    `bson:"cellphone,omitempty" json:"cellphone,omitempty"`
+	DddCellPhone         string    `bson:"ddd_cellphone,omitempty" json:"ddd_cellphone,omitempty"`
+	MobilePhoneConfirmed bool      `bson:"mobile_phone_confirmed,omitempty" json:"mobile_phone_confirmed,omitempty"`
+	UpdatedAt            time.Time `bson:"updatedAt,omitempty" json:"updatedAt,omitempty"`
 }

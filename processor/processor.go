@@ -5,9 +5,8 @@ import (
 	"github.com/coaraujo/go-processor/domains"
 	"github.com/coaraujo/go-processor/infrastructure/config"
 	"github.com/coaraujo/go-processor/infrastructure/queue"
-	"github.com/coaraujo/go-processor/services/client"
-	metauserService "github.com/coaraujo/go-processor/services/metauser"
-	"github.com/coaraujo/go-processor/services/oldmetauser"
+	"github.com/coaraujo/go-processor/services/olduser"
+	userService "github.com/coaraujo/go-processor/services/user"
 	"github.com/labstack/gommon/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sync"
@@ -39,10 +38,6 @@ func (p *processorImpl) Process() {
 			log.Infof("[Processor Process] Message received. CHANNEL: %s MESSAGE: %s", config.UserCreateTopic, string(msg))
 			processUser(msg)
 
-		case msg := <-queue.GetInstance().Notifier(config.UserUpdateTopic):
-			log.Infof("[Processor Process] Message received. CHANNEL: %s MESSAGE: %s", config.UserUpdateTopic, string(msg))
-			processUser(msg)
-
 		case msg := <-queue.GetInstance().Notifier(config.UserRemovedTopic):
 			log.Infof("[Processor Process] Message received. CHANNEL: %s MESSAGE: %s", config.UserRemovedTopic, string(msg))
 			processDeletedUser(msg)
@@ -52,73 +47,66 @@ func (p *processorImpl) Process() {
 
 var processUser = func(msg []byte) {
 	//Get message from broker
-	var queueResponse domains.QueueResponse
-	if err := json.Unmarshal(msg, &queueResponse); err != nil {
+	var user domains.User
+	if err := json.Unmarshal(msg, &user); err != nil {
 		log.Errorf("[Processor processUser] Error to parse. RESPONSE: %s ERROR:", string(msg), err)
 		return
 	}
+	log.Infof("[Processor processUser] Processing new MESSAGE: %+v", user)
 
-	//Get user from client
-	log.Infof("[Processor processUser] Processing new MESSAGE: %+v", queueResponse)
-	user, err := client.GetInstance().Get(queueResponse.Id)
-	if err != nil {
-		log.Errorf("[Processor processUser] Error to get user from Client. ERROR: %s", err)
-		return
-	}
+	//Find user from mongo
+	mongoUser, err := userService.GetInstance().Get(user.ID)
 
-	//Find metauser from mongo
-	metauser, err := metauserService.GetInstance().Get(queueResponse.Id)
-
-	//Create new metauser on mongo if it doesnt exist.
+	//Create new user on mongo if it doesnt exist.
 	if err == mongo.ErrNoDocuments {
-		id, err := metauserService.GetInstance().Insert(user, queueResponse.ClientID)
+		id, err := userService.GetInstance().Insert(&user)
 		if err != nil {
-			log.Errorf("[Processor processUser] Error to insert Metauser. ERROR: %s", err)
+			log.Errorf("[Processor processUser] Error to insert user. ERROR: %s", err)
 			return
 		}
-		log.Infof("[Processor processUser] Message successfully processed. Inserted metauser with ID: %s", id)
+		log.Infof("[Processor processUser] Message successfully processed. Inserted user with ID: %s", id)
 		return
 	}
 	if err != nil {
-		log.Errorf("[Processor processUser] Unexpected error to get metauser. ERROR: %s", err)
+		log.Errorf("[Processor processUser] Unexpected error to get user. ERROR: %s", err)
 		return
 	}
 
-	//Update metauser on mongo
-	if err = metauserService.GetInstance().Update(user, metauser, queueResponse.ClientID); err != nil {
-		log.Errorf("[Processor processUser] Error to update metauser on metausers collection. ERROR: %s", err)
+	//Update user on mongo
+	if err = userService.GetInstance().Update(&user, mongoUser); err != nil {
+		log.Errorf("[Processor processUser] Error to update user on users collection. ERROR: %s", err)
 		return
 	}
 
-	log.Infof("[Processor processUser] Message successfully processed. Updated metauser with ID: %s", metauser.ID)
+	log.Infof("[Processor processUser] Message successfully processed. Updated user with ID: %s", mongoUser.ID)
 }
 
 var processDeletedUser = func(msg []byte) {
 	//Get message from broker
-	var queueResponse domains.QueueResponse
+	var queueResponse domains.User
 	if err := json.Unmarshal(msg, &queueResponse); err != nil {
 		log.Errorf("[Processor processDeletedUser] Error to parse. RESPONSE: %s ERROR: %s", string(msg), err)
 		return
 	}
 
-	//Find metauser from mongo
-	metauser, err := metauserService.GetInstance().Get(queueResponse.Id)
+	//Find user from mongo
+	user, err := userService.GetInstance().Get(queueResponse.ID)
 	if err != nil {
-		log.Errorf("[Processor processDeletedUser] Unexpected error to get metauser. ERROR: %s", err)
+		log.Errorf("[Processor processDeletedUser] Unexpected error to get user. ERROR: %s", err)
 		return
 	}
 
-	//Insert metauser on old metausers collection
-	_, err = oldmetauser.GetInstance().Insert(metauser)
+	//Insert user on old users collection
+	_, err = olduser.GetInstance().Insert(user)
 	if err != nil {
-		log.Errorf("[Processor processDeletedUser] Error to move metauser to old metauser collection. ERROR: %s", err)
+		log.Errorf("[Processor processDeletedUser] Error to move user to old user collection. ERROR: %s", err)
 		return
 	}
 
-	if err = metauserService.GetInstance().Delete(metauser.ID); err != nil {
-		log.Errorf("[Processor processDeletedUser] Unexpected error to delete metauser. ERROR: %s", err)
+	if err = userService.GetInstance().Delete(user.ID); err != nil {
+		log.Errorf("[Processor processDeletedUser] Unexpected error to delete user. ERROR: %s", err)
 		return
 	}
 
-	log.Infof("[Processor processDeletedUser] Message successfully processed. Deleted metauser with ID: %s", metauser.ID)
+	log.Infof("[Processor processDeletedUser] Message successfully processed. Deleted user with ID: %s", user.ID)
 }

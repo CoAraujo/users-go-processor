@@ -3,9 +3,8 @@ package config
 import "os"
 
 const (
-	UserUpdateTopic     = "Consumer.Processor.VirtualTopic.user-update"
-	UserCreateTopic     = "Consumer.Processor.VirtualTopic.user-create"
-	UserRemovedTopic    = "Consumer.Processor.VirtualTopic.user-remove"
+	UserCreateTopic  = "Consumer.Processor.VirtualTopic.user-create"
+	UserRemovedTopic = "Consumer.Processor.VirtualTopic.user-remove"
 )
 
 var (
@@ -20,7 +19,4 @@ var (
 	MongodbPassword = os.Getenv("MONGODB_PASSWORD")
 	MongodbHost     = os.Getenv("MONGODB_HOSTS")
 	MongodbPort     = os.Getenv("MONGODB_PORT")
-
-	HttpProtocol = os.Getenv("HTTP_PROTOCOL")
-	Host         = os.Getenv("HOST")
 )

@@ -2,9 +2,8 @@ package processor
 
 import (
 	"github.com/coaraujo/go-processor/domains"
-	"github.com/coaraujo/go-processor/services/client"
-	"github.com/coaraujo/go-processor/services/metauser"
-	"github.com/coaraujo/go-processor/services/oldmetauser"
+	"github.com/coaraujo/go-processor/services/olduser"
+	"github.com/coaraujo/go-processor/services/user"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,343 +11,274 @@ import (
 )
 
 func TestProcessUser_UnmarshalError(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+	userServiceMock := &user.UserMock{}
 
 	msg := []byte("hello world")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
 	processUser(msg)
 
-	clientServiceMock.AssertNotCalled(t, "Get", mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Get", mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
-		mock.AnythingOfType("*domains.MetaUser"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Get", mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
+		mock.AnythingOfType("*domains.User"), mock.Anything)
 
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
 func TestProcessUser_GetUser_Error(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+	userServiceMock := &user.UserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
 	userError := errors.New("user error")
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
-	clientServiceMock.On("Get", id).
+	userServiceMock.On("Get", user.ID).
 		Return(user, userError).
 		Once()
 
 	processUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Get", mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
-		mock.AnythingOfType("*domains.MetaUser"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
+		mock.AnythingOfType("*domains.User"), mock.Anything)
 
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessUser_GetMetaUser_Error(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+func TestProcessUser_GetUser_NotFound(t *testing.T) {
+	userServiceMock := &user.UserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
-	metauser := &domains.MetaUser{ID: id}
-	metaUserError := errors.New("metauser error")
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
-	clientServiceMock.On("Get", id).
-		Return(user, nil).
+	userServiceMock.On("Get", user.ID).
+		Return(user, mongo.ErrNoDocuments).
 		Once()
 
-	metauserServiceMock.On("Get", user.ID).
-		Return(metauser, metaUserError).
-		Once()
-
-	processUser(msg)
-
-	metauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
-	metauserServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
-		mock.AnythingOfType("*domains.MetaUser"), mock.Anything)
-
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
-}
-
-func TestProcessUser_GetMetaUser_NotFound(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
-
-	id := "111111-222-3333-45454545-888990000"
-	user := &domains.User{ID: id}
-	metauser := &domains.MetaUser{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
-
-	clientServiceMock.On("Get", id).
-		Return(user, nil).
-		Once()
-
-	metauserServiceMock.On("Get", user.ID).
-		Return(metauser, mongo.ErrNoDocuments).
-		Once()
-
-	metauserServiceMock.On("Insert", user, mock.Anything).
+	userServiceMock.On("Insert", user, mock.Anything).
 		Return(id, nil).
 		Once()
 
 	processUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
-		mock.AnythingOfType("*domains.MetaUser"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
+		mock.AnythingOfType("*domains.User"), mock.Anything)
 
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessUser_InsertMetaUser_Error(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+func TestProcessUser_InsertUser_Error(t *testing.T) {
+	userServiceMock := &user.UserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
-	metauser := &domains.MetaUser{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-	insertError := errors.New("Insert metauser error.")
+	insertError := errors.New("Insert user error.")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
-	clientServiceMock.On("Get", id).
-		Return(user, nil).
+	userServiceMock.On("Get", user.ID).
+		Return(user, mongo.ErrNoDocuments).
 		Once()
 
-	metauserServiceMock.On("Get", user.ID).
-		Return(metauser, mongo.ErrNoDocuments).
-		Once()
-
-	metauserServiceMock.On("Insert", user, mock.Anything).
+	userServiceMock.On("Insert", user, mock.Anything).
 		Return("", insertError).
 		Once()
 
 	processUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
-		mock.AnythingOfType("*domains.MetaUser"), mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Update", mock.AnythingOfType("*domains.User"),
+		mock.AnythingOfType("*domains.User"), mock.Anything)
 
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessUser_UpdateMetaUser_Error(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+func TestProcessUser_UpdateUser_Error(t *testing.T) {
+	userServiceMock := &user.UserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	user := &domains.User{ID: id}
-	metauser := &domains.MetaUser{ID: id}
+	newUser := &domains.User{ID: id}
+	oldUser := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-	updateError := errors.New("update metauser error.")
+	updateError := errors.New("update oldUser error.")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
-	clientServiceMock.On("Get", id).
-		Return(user, nil).
+	userServiceMock.On("Get", newUser.ID).
+		Return(oldUser, nil).
 		Once()
 
-	metauserServiceMock.On("Get", user.ID).
-		Return(metauser, nil).
-		Once()
-
-	metauserServiceMock.On("Update", user, metauser, mock.Anything).
+	userServiceMock.On("Update", newUser, oldUser, mock.Anything).
 		Return(updateError).
 		Once()
 
 	processUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
+	userServiceMock.AssertExpectations(t)
 }
 
 func TestProcessUser_Success(t *testing.T) {
-	clientServiceMock := &client.ClientMock{}
-	metauserServiceMock := &metauser.MetaUserMock{}
+	userServiceMock := &user.UserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	user := &domains.User{ID: id}
-	metauser := &domains.MetaUser{ID: id}
+	newUser := &domains.User{ID: id}
+	oldUser := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
 
-	_ = clientServiceMock.Initialize()
-	_ = metauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
 
-	clientServiceMock.On("Get", id).
-		Return(user, nil).
+	userServiceMock.On("Get", newUser.ID).
+		Return(oldUser, nil).
 		Once()
 
-	metauserServiceMock.On("Get", user.ID).
-		Return(metauser, nil).
-		Once()
-
-	metauserServiceMock.On("Update", user, metauser, mock.Anything).
+	userServiceMock.On("Update", newUser, oldUser, mock.Anything).
 		Return(nil).
 		Once()
 
 	processUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
-	clientServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"), mock.Anything)
+	userServiceMock.AssertExpectations(t)
 }
 
 func TestProcessDeletedUser_UnmarshalError(t *testing.T) {
-	metauserServiceMock := &metauser.MetaUserMock{}
-	oldmetauserServiceMock := &oldmetauser.OldMetaUserMock{}
+	userServiceMock := &user.UserMock{}
+	olduserServiceMock := &olduser.OldUserMock{}
 
 	msg := []byte("hello world")
 
-	_ = metauserServiceMock.Initialize()
-	_ = oldmetauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
+	_ = olduserServiceMock.Initialize()
 
 	processDeletedUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Get", mock.Anything)
-	oldmetauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.MetaUser"))
-	metauserServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Get", mock.Anything)
+	olduserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"))
+	userServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
 
-	oldmetauserServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	olduserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessDeletedUser_GetMetaUser_Error(t *testing.T) {
-	metauserServiceMock := &metauser.MetaUserMock{}
-	oldmetauserServiceMock := &oldmetauser.OldMetaUserMock{}
+func TestProcessDeletedUser_GetUser_Error(t *testing.T) {
+	userServiceMock := &user.UserMock{}
+	olduserServiceMock := &olduser.OldUserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	metauserMock := &domains.MetaUser{ID: id}
+	userMock := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-	getError := errors.New("get metauser error")
+	getError := errors.New("get user error")
 
-	_ = metauserServiceMock.Initialize()
-	_ = oldmetauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
+	_ = olduserServiceMock.Initialize()
 
-	metauserServiceMock.On("Get", id).
-		Return(metauserMock, getError).
+	userServiceMock.On("Get", id).
+		Return(userMock, getError).
 		Once()
 
 	processDeletedUser(msg)
 
-	oldmetauserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.MetaUser"))
-	metauserServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
+	olduserServiceMock.AssertNotCalled(t, "Insert", mock.AnythingOfType("*domains.User"))
+	userServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
 
-	oldmetauserServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	olduserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessDeletedUser_InsertOldMetaUser_Error(t *testing.T) {
-	metauserServiceMock := &metauser.MetaUserMock{}
-	oldmetauserServiceMock := &oldmetauser.OldMetaUserMock{}
+func TestProcessDeletedUser_InsertOldUser_Error(t *testing.T) {
+	userServiceMock := &user.UserMock{}
+	olduserServiceMock := &olduser.OldUserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	metauserMock := &domains.MetaUser{ID: id}
+	userMock := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-	insertError := errors.New("insert metauser error")
+	insertError := errors.New("insert user error")
 
-	_ = metauserServiceMock.Initialize()
-	_ = oldmetauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
+	_ = olduserServiceMock.Initialize()
 
-	metauserServiceMock.On("Get", id).
-		Return(metauserMock, nil).
+	userServiceMock.On("Get", id).
+		Return(userMock, nil).
 		Once()
 
-	oldmetauserServiceMock.On("Insert", metauserMock).
+	olduserServiceMock.On("Insert", userMock).
 		Return("id", insertError).
 		Once()
 
 	processDeletedUser(msg)
 
-	metauserServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
+	userServiceMock.AssertNotCalled(t, "Delete", mock.Anything)
 
-	oldmetauserServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	olduserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
-func TestProcessDeletedUser_DeleteMetaUser_Error(t *testing.T) {
-	metauserServiceMock := &metauser.MetaUserMock{}
-	oldmetauserServiceMock := &oldmetauser.OldMetaUserMock{}
+func TestProcessDeletedUser_DeleteUser_Error(t *testing.T) {
+	userServiceMock := &user.UserMock{}
+	olduserServiceMock := &olduser.OldUserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	insertedId := "66666-4444-88888-252525225-6661112222"
-	metauserMock := &domains.MetaUser{ID: id}
+	userMock := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
-	deleteError := errors.New("delete metauser error")
+	deleteError := errors.New("delete user error")
 
-	_ = metauserServiceMock.Initialize()
-	_ = oldmetauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
+	_ = olduserServiceMock.Initialize()
 
-	metauserServiceMock.On("Get", id).
-		Return(metauserMock, nil).
+	userServiceMock.On("Get", id).
+		Return(userMock, nil).
 		Once()
 
-	oldmetauserServiceMock.On("Insert", metauserMock).
+	olduserServiceMock.On("Insert", userMock).
 		Return(insertedId, nil).
 		Once()
 
-	metauserServiceMock.On("Delete", metauserMock.ID).
+	userServiceMock.On("Delete", userMock.ID).
 		Return(deleteError).
 		Once()
 
 	processDeletedUser(msg)
 
-	oldmetauserServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	olduserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }
 
 func TestProcessDeletedUser_Success(t *testing.T) {
-	metauserServiceMock := &metauser.MetaUserMock{}
-	oldmetauserServiceMock := &oldmetauser.OldMetaUserMock{}
+	userServiceMock := &user.UserMock{}
+	olduserServiceMock := &olduser.OldUserMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	insertedId := "66666-4444-88888-252525225-6661112222"
-	metauserMock := &domains.MetaUser{ID: id}
+	userMock := &domains.User{ID: id}
 	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
 
-	_ = metauserServiceMock.Initialize()
-	_ = oldmetauserServiceMock.Initialize()
+	_ = userServiceMock.Initialize()
+	_ = olduserServiceMock.Initialize()
 
-	metauserServiceMock.On("Get", id).
-		Return(metauserMock, nil).
+	userServiceMock.On("Get", id).
+		Return(userMock, nil).
 		Once()
 
-	oldmetauserServiceMock.On("Insert", metauserMock).
+	olduserServiceMock.On("Insert", userMock).
 		Return(insertedId, nil).
 		Once()
 
-	metauserServiceMock.On("Delete", metauserMock.ID).
+	userServiceMock.On("Delete", userMock.ID).
 		Return(nil).
 		Once()
 
 	processDeletedUser(msg)
 
-	oldmetauserServiceMock.AssertExpectations(t)
-	metauserServiceMock.AssertExpectations(t)
+	olduserServiceMock.AssertExpectations(t)
+	userServiceMock.AssertExpectations(t)
 }

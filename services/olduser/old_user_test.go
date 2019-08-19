@@ -1,4 +1,4 @@
-package oldmetauser
+package olduser
 
 import (
 	"context"
@@ -12,74 +12,74 @@ import (
 	"time"
 )
 
-func TestOldMetaUsersImpl_Get_Success(t *testing.T) {
+func TestOldUsersImpl_Get_Success(t *testing.T) {
 	mongoMock := &storage.DataAccessLayerMock{}
-	oldMetauserMock := &domains.MetaUser{}
+	oldUserMock := &domains.User{}
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("FindOne", mock.Anything, oldMetausersCollection, mock.Anything, mock.AnythingOfType("*domains.MetaUser")).
+	mongoMock.On("FindOne", mock.Anything, oldUsersCollection, mock.Anything, mock.AnythingOfType("*domains.User")).
 		Return(nil).
 		Once()
 
-	oldMetauser, err := GetInstance().Get("id")
+	oldUser, err := GetInstance().Get("id")
 	assert.Nil(t, err)
-	assert.Equal(t, oldMetauser, oldMetauserMock)
+	assert.Equal(t, oldUser, oldUserMock)
 
 	mongoMock.AssertExpectations(t)
 }
 
-func TestOldMetaUsersImpl_Get_Error(t *testing.T) {
+func TestOldUsersImpl_Get_Error(t *testing.T) {
 	mongoMock := &storage.DataAccessLayerMock{}
 	mgoErr := errors.New("error")
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("FindOne", mock.Anything, oldMetausersCollection, mock.Anything, mock.AnythingOfType("*domains.MetaUser")).
+	mongoMock.On("FindOne", mock.Anything, oldUsersCollection, mock.Anything, mock.AnythingOfType("*domains.User")).
 		Return(mgoErr).
 		Once()
 
-	oldMetauser, err := GetInstance().Get("id")
+	oldUser, err := GetInstance().Get("id")
 	assert.NotNil(t, err)
 	assert.Equal(t, mgoErr, err)
-	assert.Nil(t, oldMetauser)
+	assert.Nil(t, oldUser)
 
 	mongoMock.AssertExpectations(t)
 }
 
-func TestOldMetaUsersImpl_Insert_Success(t *testing.T) {
+func TestOldUsersImpl_Insert_Success(t *testing.T) {
 	mongoMock := &storage.DataAccessLayerMock{}
 	updatedAt := time.Now()
-	metauserMock := &domains.MetaUser{}
+	oldUserMock := &domains.User{}
 	mockId := "inserted_id"
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("Insert", mock.Anything, oldMetausersCollection, mock.Anything).
+	mongoMock.On("Insert", mock.Anything, oldUsersCollection, mock.Anything).
 		Return(mockId, nil).
 		Once()
 
-	id, err := GetInstance().Insert(metauserMock)
+	id, err := GetInstance().Insert(oldUserMock)
 	assert.Nil(t, err)
 	assert.Equal(t, id, mockId)
-	assert.NotEqual(t, updatedAt, metauserMock.UpdatedAt)
+	assert.NotEqual(t, updatedAt, oldUserMock.UpdatedAt)
 
 	mongoMock.AssertExpectations(t)
 }
 
-func TestOldMetaUsersImpl_Insert_Error(t *testing.T) {
+func TestOldUsersImpl_Insert_Error(t *testing.T) {
 	mongoMock := &storage.DataAccessLayerMock{}
 	updatedAt := time.Now()
-	metauserMock := &domains.MetaUser{}
+	userMock := &domains.User{}
 	mockid := "inserted_id"
 	mgoErr := errors.New("error")
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("Insert", mock.Anything, oldMetausersCollection, mock.Anything).
+	mongoMock.On("Insert", mock.Anything, oldUsersCollection, mock.Anything).
 		Return("", mgoErr).
 		Once()
 
-	id, err := GetInstance().Insert(metauserMock)
+	id, err := GetInstance().Insert(userMock)
 	assert.Equal(t, err, mgoErr)
 	assert.NotEqual(t, id, mockid)
-	assert.NotEqual(t, updatedAt, metauserMock.UpdatedAt)
+	assert.NotEqual(t, updatedAt, userMock.UpdatedAt)
 
 	mongoMock.AssertExpectations(t)
 }
