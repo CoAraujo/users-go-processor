@@ -56,7 +56,7 @@ func (u *usersImpl) Insert(user *domains.User) (string, error) {
 
 	id, mgoErr := storage.GetInstance().Insert(ctx, usersCollection, user)
 	if mgoErr != nil {
-		return id.(string), mgoErr
+		return "", mgoErr
 	}
 
 	return id.(string), nil

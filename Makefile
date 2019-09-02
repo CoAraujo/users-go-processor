@@ -7,5 +7,4 @@ up:
 	docker-compose up -d
 
 .PHONY: all
-all:
-	build-go-processor up
+all: build-go-processor up
