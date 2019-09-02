@@ -18,7 +18,7 @@
 1. Baixe o repositório como arquivo zip ou faça um clone;
 2. Descompacte os arquivos em seu computador;
 3. Abra a pasta decompactada
-4. Execute `make all`
+4. Execute `make up`
 5. Aguarde até a stack inteira estar deployada.
 6. Acesse o ActiveMQ (www.localhost:8161) para enviar mensagens para a fila e simular um projeto real.
 
