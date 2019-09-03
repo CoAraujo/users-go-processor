@@ -3,7 +3,7 @@ package domains
 import "time"
 
 type User struct {
-	ID        string    `bson:"id,omitempty" json:"id,omitempty"`
+	ID        string    `bson:"_id,omitempty" json:"_id,omitempty"`
 	Email     string    `bson:"email,omitempty" json:"email,omitempty"`
 	Username  string    `bson:"username,omitempty" json:"username,omitempty"`
 	Name      string    `bson:"fullName,omitempty" json:"fullName,omitempty"`

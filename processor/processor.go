@@ -37,10 +37,12 @@ func (p *processorImpl) Process() {
 		case msg := <-queue.GetInstance().Notifier(config.UserCreateTopic):
 			log.Infof("[Processor Process] Message received. CHANNEL: %s MESSAGE: %s", config.UserCreateTopic, string(msg))
 			processUser(msg)
+			continue
 
 		case msg := <-queue.GetInstance().Notifier(config.UserRemovedTopic):
 			log.Infof("[Processor Process] Message received. CHANNEL: %s MESSAGE: %s", config.UserRemovedTopic, string(msg))
 			processDeletedUser(msg)
+			continue
 		}
 	}
 }
