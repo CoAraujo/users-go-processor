@@ -1,4 +1,4 @@
-# Paredão
+# users-processor
 
 ## Descrição
 * Projeto para ouvir filas de uma mensageria (ActiveMQ), processar e salvar em um banco de dados. (Mongo)
