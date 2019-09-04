@@ -80,8 +80,9 @@ func (u *usersImpl) Update(newUser *domains.User, oldUser *domains.User) error {
 	validateUpdatedAt(newUser)
 	updateNewUserValues(oldUser, newUser)
 
-	if mgoErr := storage.GetInstance().Update(ctx, usersCollection, map[string]interface{}{"_id": oldUser.ID},
-		map[string]interface{}{"$set": &oldUser}); mgoErr != nil {
+	_, mgoErr := storage.GetInstance().UpdateOne(ctx, usersCollection, map[string]interface{}{"_id": oldUser.ID},
+		map[string]interface{}{"$set": &oldUser});
+	if mgoErr != nil {
 		return mgoErr
 	}
 

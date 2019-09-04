@@ -1,6 +1,7 @@
 package user
 
 import (
+	"go.mongodb.org/mongo-driver/mongo"
 	"context"
 	"errors"
 	"github.com/coaraujo/go-processor/domains"
@@ -178,8 +179,8 @@ func TestUsersImpl_Update_Success(t *testing.T) {
 	}
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("Update", mock.Anything, usersCollection, mock.Anything, mock.Anything).
-		Return(nil).
+	mongoMock.On("UpdateOne", mock.Anything, usersCollection, mock.Anything, mock.Anything).
+		Return(&mongo.UpdateResult{}, nil).
 		Once()
 
 	err := GetInstance().Update(&newUser, &oldUser)
@@ -198,8 +199,8 @@ func TestUsersImpl_Update_Error(t *testing.T) {
 	userMock := &domains.User{}
 
 	_ = mongoMock.Initialize(context.Background(), options.Credential{}, mock.Anything, mock.Anything)
-	mongoMock.On("Update", mock.Anything, usersCollection, mock.Anything, mock.Anything).
-		Return(mgoErr).
+	mongoMock.On("UpdateOne", mock.Anything, usersCollection, mock.Anything, mock.Anything).
+		Return(&mongo.UpdateResult{}, mgoErr).
 		Once()
 
 	err := GetInstance().Update(user, userMock)
