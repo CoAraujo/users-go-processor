@@ -88,7 +88,7 @@ func TestProcessUser_InsertUser_Error(t *testing.T) {
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
 	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
-	insertError := errors.New("Insert user error.")
+	insertError := errors.New("Insert user error")
 
 	_ = userServiceMock.Initialize()
 	_ = brokerServiceMock.Initialize()
@@ -117,7 +117,7 @@ func TestProcessUser_UpdateUser_Error(t *testing.T) {
 	newUser := &domains.User{ID: id}
 	oldUser := &domains.User{ID: id}
 	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
-	updateError := errors.New("update oldUser error.")
+	updateError := errors.New("update oldUser error")
 
 	_ = userServiceMock.Initialize()
 	_ = brokerServiceMock.Initialize()
@@ -246,7 +246,7 @@ func TestProcessDeletedUser_DeleteUser_Error(t *testing.T) {
 	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	insertedId := "66666-4444-88888-252525225-6661112222"
+	insertedID := "66666-4444-88888-252525225-6661112222"
 	userMock := &domains.User{ID: id}
 	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	deleteError := errors.New("delete user error")
@@ -260,7 +260,7 @@ func TestProcessDeletedUser_DeleteUser_Error(t *testing.T) {
 		Once()
 
 	olduserServiceMock.On("Insert", userMock).
-		Return(insertedId, nil).
+		Return(insertedID, nil).
 		Once()
 
 	userServiceMock.On("Delete", userMock.ID).
@@ -279,7 +279,7 @@ func TestProcessDeletedUser_Success(t *testing.T) {
 	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
-	insertedId := "66666-4444-88888-252525225-6661112222"
+	insertedID := "66666-4444-88888-252525225-6661112222"
 	userMock := &domains.User{ID: id}
 	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 
@@ -292,7 +292,7 @@ func TestProcessDeletedUser_Success(t *testing.T) {
 		Once()
 
 	olduserServiceMock.On("Insert", userMock).
-		Return(insertedId, nil).
+		Return(insertedID, nil).
 		Once()
 
 	userServiceMock.On("Delete", userMock.ID).
