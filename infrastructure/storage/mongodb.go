@@ -21,7 +21,7 @@ type MongoDB interface {
 	Find(ctx context.Context, collName string, query map[string]interface{}, doc interface{}) error
 	FindOne(ctx context.Context, collName string, query map[string]interface{}, doc interface{}) error
 	Count(ctx context.Context, collName string, query map[string]interface{}) (int64, error)
-	Update(ctx context.Context, collName string, query map[string]interface{}, doc interface{}) error
+	UpdateOne(ctx context.Context, collName string, query map[string]interface{}, doc interface{}) (*mongo.UpdateResult, error)
 	Remove(ctx context.Context, collName string, query map[string]interface{}) error
 	WithTransaction(ctx context.Context, fn func(context.Context) error) error
 	Initialize(ctx context.Context, credential options.Credential, dbURI string, dbName string) error
@@ -116,10 +116,10 @@ func (m *mongodbImpl) FindOne(ctx context.Context, collName string, query map[st
 	return m.client.Database(m.dbName).Collection(collName).FindOne(ctx, query).Decode(doc)
 }
 
-// Update updates one or more documents in the collection
-func (m *mongodbImpl) Update(ctx context.Context, collName string, selector map[string]interface{}, update interface{}) error {
-	_, err := m.client.Database(m.dbName).Collection(collName).UpdateOne(ctx, selector, update)
-	return err
+// UpdateOne updates one or more documents in the collection
+func (m *mongodbImpl) UpdateOne(ctx context.Context, collName string, selector map[string]interface{}, update interface{}) (*mongo.UpdateResult, error) {
+	updateResult, err := m.client.Database(m.dbName).Collection(collName).UpdateOne(ctx, selector, update)
+	return updateResult, err
 }
 
 // Remove one or more documents in the collection

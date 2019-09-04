@@ -2,8 +2,10 @@ package storage
 
 import (
 	"context"
-	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/stretchr/testify/mock"
 )
 
 //DataAccessLayerMock is a mock for db connection
@@ -48,10 +50,10 @@ func (m *DataAccessLayerMock) Count(ctx context.Context, collName string, query 
 	return int64(args.Int(0)), args.Error(1)
 }
 
-//Update is a mock for Update
-func (m *DataAccessLayerMock) Update(ctx context.Context, collName string, selector map[string]interface{}, update interface{}) error {
+//UpdateOne is a mock for UpdateOne
+func (m *DataAccessLayerMock) UpdateOne(ctx context.Context, collName string, selector map[string]interface{}, update interface{}) (*mongo.UpdateResult, error) {
 	args := m.Called(ctx, collName, selector, update)
-	return args.Error(0)
+	return args.Get(0).(*mongo.UpdateResult), args.Error(1)
 }
 
 //Remove is a mock for Remove
