@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"github.com/coaraujo/go-processor/infrastructure/queue"
+	"github.com/go-stomp/stomp"
 	"github.com/coaraujo/go-processor/domains"
 	"github.com/coaraujo/go-processor/services/olduser"
 	"github.com/coaraujo/go-processor/services/user"
@@ -13,7 +15,7 @@ import (
 func TestProcessUser_UnmarshalError(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 
-	msg := []byte("hello world")
+	msg := &stomp.Message{Body: []byte("hello world")}
 
 	_ = userServiceMock.Initialize()
 
@@ -29,13 +31,15 @@ func TestProcessUser_UnmarshalError(t *testing.T) {
 
 func TestProcessUser_GetUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
 	userError := errors.New("user error")
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 
 	_ = userServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", user.ID).
 		Return(user, userError).
@@ -52,12 +56,14 @@ func TestProcessUser_GetUser_Error(t *testing.T) {
 
 func TestProcessUser_GetUser_NotFound(t *testing.T) {
 	userServiceMock := &user.UserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 
 	_ = userServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", user.ID).
 		Return(user, mongo.ErrNoDocuments).
@@ -77,13 +83,15 @@ func TestProcessUser_GetUser_NotFound(t *testing.T) {
 
 func TestProcessUser_InsertUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	user := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	insertError := errors.New("Insert user error.")
 
 	_ = userServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", user.ID).
 		Return(user, mongo.ErrNoDocuments).
@@ -103,14 +111,16 @@ func TestProcessUser_InsertUser_Error(t *testing.T) {
 
 func TestProcessUser_UpdateUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	newUser := &domains.User{ID: id}
 	oldUser := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	updateError := errors.New("update oldUser error.")
 
 	_ = userServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", newUser.ID).
 		Return(oldUser, nil).
@@ -128,13 +138,15 @@ func TestProcessUser_UpdateUser_Error(t *testing.T) {
 
 func TestProcessUser_Success(t *testing.T) {
 	userServiceMock := &user.UserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	newUser := &domains.User{ID: id}
 	oldUser := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 
 	_ = userServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", newUser.ID).
 		Return(oldUser, nil).
@@ -153,11 +165,13 @@ func TestProcessUser_Success(t *testing.T) {
 func TestProcessDeletedUser_UnmarshalError(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 	olduserServiceMock := &olduser.OldUserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
-	msg := []byte("hello world")
+	msg := &stomp.Message{Body: []byte("hello world")}
 
 	_ = userServiceMock.Initialize()
 	_ = olduserServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	processDeletedUser(msg)
 
@@ -172,14 +186,16 @@ func TestProcessDeletedUser_UnmarshalError(t *testing.T) {
 func TestProcessDeletedUser_GetUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 	olduserServiceMock := &olduser.OldUserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	userMock := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	getError := errors.New("get user error")
 
 	_ = userServiceMock.Initialize()
 	_ = olduserServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", id).
 		Return(userMock, getError).
@@ -197,14 +213,16 @@ func TestProcessDeletedUser_GetUser_Error(t *testing.T) {
 func TestProcessDeletedUser_InsertOldUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 	olduserServiceMock := &olduser.OldUserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	userMock := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	insertError := errors.New("insert user error")
 
 	_ = userServiceMock.Initialize()
 	_ = olduserServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", id).
 		Return(userMock, nil).
@@ -225,15 +243,17 @@ func TestProcessDeletedUser_InsertOldUser_Error(t *testing.T) {
 func TestProcessDeletedUser_DeleteUser_Error(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 	olduserServiceMock := &olduser.OldUserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	insertedId := "66666-4444-88888-252525225-6661112222"
 	userMock := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 	deleteError := errors.New("delete user error")
 
 	_ = userServiceMock.Initialize()
 	_ = olduserServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", id).
 		Return(userMock, nil).
@@ -256,14 +276,16 @@ func TestProcessDeletedUser_DeleteUser_Error(t *testing.T) {
 func TestProcessDeletedUser_Success(t *testing.T) {
 	userServiceMock := &user.UserMock{}
 	olduserServiceMock := &olduser.OldUserMock{}
+	brokerServiceMock := &queue.BrokerMock{}
 
 	id := "111111-222-3333-45454545-888990000"
 	insertedId := "66666-4444-88888-252525225-6661112222"
 	userMock := &domains.User{ID: id}
-	msg := []byte("{ \"id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")
+	msg := &stomp.Message{Body: []byte("{ \"_id\":\"" + id + "\", \"enqueuedAt\": \"2019-08-15T18:15:59-03:00\" }")}
 
 	_ = userServiceMock.Initialize()
 	_ = olduserServiceMock.Initialize()
+	_ = brokerServiceMock.Initialize()
 
 	userServiceMock.On("Get", id).
 		Return(userMock, nil).
