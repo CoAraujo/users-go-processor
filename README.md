@@ -13,6 +13,8 @@
 * [ActiveMQ](https://activemq.apache.org/)
 * [Docker](https://www.docker.com/)
 * [Docker-compose](https://docs.docker.com/compose/)
+* [Echo Framework](https://echo.labstack.com/)
+* [Go Mod](https://blog.golang.org/using-go-modules)
 
 ## Instalação
 1. Baixe o repositório como arquivo zip ou faça um clone;
