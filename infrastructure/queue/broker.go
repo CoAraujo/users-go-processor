@@ -107,7 +107,7 @@ func (b *brokerImpl) Listen(channel string) {
 
 	log.Infof("[Broker Listen] Subscribing on CHANNEL: %s", channel)
 	subID := channel + "-" + strconv.Itoa(rand.Intn(1000))
-	sub, err := b.conn.Subscribe(channel, stomp.AckClientIndividual, stomp.SubscribeOpt.Id(subId))
+	sub, err := b.conn.Subscribe(channel, stomp.AckClientIndividual, stomp.SubscribeOpt.Id(subID))
 	if err != nil {
 		log.Errorf("[Broker Listen] Fail to subscribe. CHANNEL: %s ERROR: %s", string(channel), err)
 	}
