@@ -19,4 +19,7 @@ var (
 	MongodbPassword = os.Getenv("MONGODB_PASSWORD")
 	MongodbHost     = os.Getenv("MONGODB_HOSTS")
 	MongodbPort     = os.Getenv("MONGODB_PORT")
+
+	MaximumRedeliveries = 10
+	RedeliveryDelay     = 1000
 )
