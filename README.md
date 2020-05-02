@@ -1,9 +1,9 @@
-# users-processor
+# users-go-processor
 
 ## Descrição
 * Projeto para ouvir filas de uma mensageria (ActiveMQ), processar e salvar em um banco de dados. (Mongo)
 * Está faltando a parte de update de usuário
-* Este projeto é em conjunto com o projeto [users-api](https://github.com/CoAraujo/users-api), basta rodar o `make run` de ambos. 
+* Este projeto é em conjunto com o projeto [users-api](https://github.com/CoAraujo/users-go-api), basta rodar o `make run` de ambos. 
 
 ## Requisitos Mínimos
 * [Go 1.12+](https://golang.org/)
