@@ -10,6 +10,8 @@ services:
       - 9090:9090
     env_file:
       - ./commons.env
+    networks:
+      - user-api-processor
 
   activemq:
     image: rmohr/activemq
@@ -17,6 +19,8 @@ services:
       - 61616:61616
       - 61613:61613
       - 8161:8161
+    networks:
+      - user-api-processor
 
   mongo:
     image: mongo:latest
@@ -28,3 +32,9 @@ services:
       - MONGODB_APPLICATION_PASS=admin
     ports:
       - 27017:27017
+    networks:
+      - user-api-processor
+
+networks:
+  user-api-processor:
+    external: true

@@ -3,8 +3,8 @@ package config
 import "os"
 
 const (
-	UserCreateTopic  = "Consumer.Processor.VirtualTopic.user-create"
-	UserRemovedTopic = "Consumer.Processor.VirtualTopic.user-remove"
+	UserCreateTopic  = "VirtualTopic.user-create"
+	UserRemovedTopic = "VirtualTopic.user-remove"
 )
 
 var (
