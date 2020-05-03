@@ -2,8 +2,8 @@ package olduser
 
 import (
 	"context"
-	"github.com/coaraujo/go-processor/domains"
-	"github.com/coaraujo/go-processor/infrastructure/storage"
+	"github.com/coaraujo/users-go-processor/domains"
+	"github.com/coaraujo/users-go-processor/infrastructure/storage"
 	"sync"
 	"time"
 )

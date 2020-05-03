@@ -1,11 +1,11 @@
 package processor
 
 import (
-	"github.com/coaraujo/go-processor/infrastructure/queue"
+	"github.com/coaraujo/users-go-processor/infrastructure/queue"
 	"github.com/go-stomp/stomp"
-	"github.com/coaraujo/go-processor/domains"
-	"github.com/coaraujo/go-processor/services/olduser"
-	"github.com/coaraujo/go-processor/services/user"
+	"github.com/coaraujo/users-go-processor/domains"
+	"github.com/coaraujo/users-go-processor/services/olduser"
+	"github.com/coaraujo/users-go-processor/services/user"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"

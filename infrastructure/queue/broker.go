@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"github.com/go-stomp/stomp/frame"
 	"strconv"
-	"github.com/coaraujo/go-processor/infrastructure/config"
+	"github.com/coaraujo/users-go-processor/infrastructure/config"
 	"github.com/go-stomp/stomp"
 	"github.com/labstack/gommon/log"
 	"sync"

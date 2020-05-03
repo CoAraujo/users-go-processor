@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/coaraujo/go-processor/infrastructure/config"
-	"github.com/coaraujo/go-processor/infrastructure/queue"
-	"github.com/coaraujo/go-processor/infrastructure/storage"
-	"github.com/coaraujo/go-processor/processor"
+	"github.com/coaraujo/users-go-processor/infrastructure/config"
+	"github.com/coaraujo/users-go-processor/infrastructure/queue"
+	"github.com/coaraujo/users-go-processor/infrastructure/storage"
+	"github.com/coaraujo/users-go-processor/processor"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"

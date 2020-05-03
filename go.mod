@@ -1,4 +1,4 @@
-module github.com/coaraujo/go-processor
+module github.com/coaraujo/users-go-processor
 
 go 1.12
 

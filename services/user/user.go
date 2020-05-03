@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/coaraujo/go-processor/domains"
-	"github.com/coaraujo/go-processor/infrastructure/storage"
+	"github.com/coaraujo/users-go-processor/domains"
+	"github.com/coaraujo/users-go-processor/infrastructure/storage"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/labstack/gommon/log"

@@ -8,6 +8,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o go-processor .
+RUN go build -o users-go-processor .
 
-CMD ["./go-processor"]
+CMD ["./users-go-processor"]

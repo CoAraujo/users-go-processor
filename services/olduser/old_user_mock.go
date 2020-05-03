@@ -1,7 +1,7 @@
 package olduser
 
 import (
-	"github.com/coaraujo/go-processor/domains"
+	"github.com/coaraujo/users-go-processor/domains"
 	"github.com/stretchr/testify/mock"
 )
 
